@@ -17,3 +17,7 @@ https://www.kaggle.com/datasets/kwadwoofosu/predict-test-scores-of-students
 
 Using the R file, you should press the button named- Knit.<br>
 It will instantly create the HTML file online.
+
+
+### A preview of the HTML file: ###
+![image](https://user-images.githubusercontent.com/103519609/179391506-e9d91f17-e37b-4f09-9d75-9b9c720ff54a.png)
