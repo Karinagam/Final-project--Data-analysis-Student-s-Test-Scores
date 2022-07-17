@@ -1,0 +1,864 @@
+
+---
+title: "Student's Test Scores"
+author: "Karin Agam and Shir Peretz"
+output:
+  html_document:
+    theme: united
+    highlight: kate
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+
+
+<center>
+![](https://1en5vh48t4rqdnq1j3h9ihn4-wpengine.netdna-ssl.com/wp-content/uploads/2018/01/AdobeStock_170654250-860x420.jpeg)
+</center>
+<bar><bar><bar><bar>
+
+
+
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+<span style="color: lightseagreen;">"Education is the most powerful weapon which you can use to change the world"</span>
+
+— Nelson Mandela
+</center>
+</div>
+
+
+
+
+ 
+***
+## {.tabset}
+### <span style= "color: seagreen;">Background</span> 
+
+<span style="color: forestgreen;">**Let's talk education!**</span>
+
+In this markdown, we analyze [this data](https://www.kaggle.com/kwadwoofosu/predict-test-scores-of-students).
+The data contains information about students. It includes features such as: School setting, School type, gender, pre test scores and more.
+<br><br>
+<center>
+![](https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80)
+</center>
+<br><br>
+
+
+###  <span style= "color: seagreen;">Goals</span> {.tabset} 
+
+In this project, we will demonstrate various elements which we expect to see in the project, while taking you with us through the whole process, from the beginning to the end, as we build the analysis in real time together. 
+
+Our main goal of this project is to identify, study and analyze students success, so the Education system can have a better understanding of the main conditions that result higher test scores.All of that according to their environment, different conditions and methods strategies to each of them bringing more fertile learning to the students.
+ 
+<span style="color: lightseagreen;">**Here are some related research questions we will examine and explore:**</span>
+
+
+
+  * How well did the pre test score predicts the post test score?
+
+  * Is there a connection between the number of students in a classroom to their classroom test scores mean? 
+
+  * what are the characteristics of a successful student?
+  
+  * Is there a difference between females and males post test scores? 
+    
+    
+    
+<br><br>
+
+    
+_______  
+
+
+
+### <span style= "color: seagreen;">Data Import and Tidying</span> {.tabset} 
+
+
+```{r libraries, message=FALSE, warning=FALSE}
+
+#We used the libraries below:
+
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(ggcorrplot)
+library(ggplot2)
+library(RColorBrewer)
+library(hrbrthemes)
+library(dplyr)
+library(tidyr)
+library(viridis)
+library(wesanderson)
+library(VennDiagram)
+library(tibble)
+library(ggpubr)
+
+```
+
+
+**We´ll perform the following:**
+
+First, we will read the data from the csv file.
+<br>
+```{r read test scores script data, warning=FALSE}
+
+Test_Score <- read_csv(file ='test_scores.csv')%>%
+  clean_names()%>%
+  view()
+ 
+```
+<br>
+*This is our table of the Data Test_score:*
+<br>
+```{r Test_Score table, message=FALSE, warning=FALSE, cols.print=11, rows.print=20}
+
+Test_Score
+
+```
+<br>
+
+From a quick look, we don't see anything wrong with the data but just in case we will check.
+
+* Let's see first if we encounter any NA values in our data and extract all of them:
+
+```{r}
+sum(is.na(Test_Score))
+```
+
+We can see that there is *no* missing data and all values are valid. 
+
+* Then, We will extract all the duplicated rows by their student_id:
+
+```{r data Tidying, warning = FALSE}
+Test_Score = distinct(Test_Score, student_id,.keep_all = TRUE)
+```
+
+From a quick view at the data we saw that the data haven't changed at all. 
+Now the data is ready to be worked with. 
+<br><br>
+__Lets move to Transformation, Visualization, and Modelling!__
+<br><br><br>
+
+### <span style= "color: seagreen;">Transformation, Visualization, and Modelling</span> {.tabset} 
+
+
+
+*Which kind of students appear in the data?*
+<br><br>
+<center>
+![](https://images.unsplash.com/photo-1588072432836-e10032774350?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=752&q=80)
+</center>
+<br><br><br>
+First, let's map the data by showing how the students are distributed into categories that appear in the data.
+<br>
+<center>
+```{r post test scores vs school setting grouped boxplot, fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
+
+#post test scores vs school setting grouped boxplot
+
+ggplot(Test_Score , aes( x=school_setting ,group= school_setting, y=posttest)) + 
+  geom_boxplot(aes(fill = school_setting))+
+  ggtitle("Post Test Scores vs School Setting")+
+  scale_fill_viridis(discrete=TRUE, option = "C") +
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.9, "lines"),
+    
+  )
+```
+</center>
+<br>
+This visualization shows the connection between the school type and the students' grades.
+We can see that the highest grades belong to students who study in the suburban schools, after them, there are the students who study in the rural schools and finally we have the urban school students.
+<br>
+<center>
+```{r post test scores vs gender boxplot, fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
+#post test scores vs gender boxplot
+
+ggplot(Test_Score , aes( x=gender , y=posttest, fill = gender,)) + 
+  geom_boxplot()+
+  ggtitle("Post Test Scores vs Gender")+
+  scale_fill_manual(values = wes_palette("GrandBudapest1", n = 3))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.9, "lines"),
+  )
+
+```
+</center>
+<br>
+This visualization shows the connection between the students' gender and their grades.
+As we can see, there's no difference between genders regarding their test scores.
+Both genders have the same mean of test scores.
+<br>
+<center>
+```{r post test scores vs n_student boxplot, fig.height=5, fig.width=6, message=FALSE, warning=FALSE}
+
+#post test scores vs n_student boxplot
+
+ggplot(Test_Score, aes(x = n_student, group= n_student, y = posttest))+
+         geom_boxplot(aes(fill=n_student))+
+        ggtitle("Post Test Scores vs N_student")+
+         scale_fill_viridis(option = "c") +
+         theme_ipsum()+
+         theme_bw()+
+         theme(
+           legend.position="none",
+           panel.spacing = unit(0.9, "lines"),
+         )
+
+```
+</center>
+<br>
+This visualization shows the connection between the number of students in each class and their test scores. 
+As we can see, the ultimate number of students in a class stands between 15-20.
+Students with the highest mean of grades, study in a class with less than 20 students. 
+Classes with more than 25 students tend to have the lowest mean of grades.
+<br>
+<center>
+```{r a post test scores vs n_student plots, fig.height=5, fig.show='hold', fig.width=7, message=FALSE, warning=FALSE, out.width=c('50%', '50%')}
+
+#post test scores vs n_student boxplot
+df <- Test_Score[order(Test_Score$n_student,decreasing = TRUE),]
+ggplot(Test_Score, aes(x = n_student, col = "red")) + 
+  geom_bar()+
+  ggtitle("Post Test Scores vs N_student")+
+  coord_flip() +
+  theme_ipsum()+
+  theme_classic()
+
+#What is the school type in each class size in percentage
+brks <- c(0, 0.25, 0.5, 0.75, 1)
+
+library(dplyr)
+d2 <- Test_Score %>% 
+  group_by(n_student, school_type ) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count))
+
+ggplot(d2, aes(x = factor(n_student), y = perc, fill = factor(school_type))) +
+  geom_bar(stat="identity", width = 0.7) +
+  ggtitle("School Type in Each Class size In Percentage")+
+  scale_y_percent()+
+  labs(x = "n_student", y = "percent", fill = "school_type") +
+  theme_minimal(base_size = 14)
+
+```
+</center>
+<br>
+Here we can see what part of students in a class are in public school or non public school according to their class size. 
+We can see that classes with the lowest amount of students belong to non-public schools.
+Classes with the highest amount of students belong to public schools.
+<br>
+<center>
+```{r Post Test Scores vs Teaching Method grouped boxplot, fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
+
+#Post Test Scores vs Teaching Method grouped boxplot
+
+ggplot(Test_Score , aes( x=teaching_method ,group= teaching_method, y=posttest)) + 
+  geom_boxplot(aes(fill = teaching_method))+
+  ggtitle("Post Test Scores vs Teaching Method")+
+  scale_fill_viridis(discrete=TRUE, option = "D") +
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.9, "lines"),
+  )
+
+
+
+```
+</center>
+<br>
+This visualization shows the connection between the teaching method and the students' scores.
+Students who study with the experimental teaching method got better scores than the ones who study with the standard teaching method.
+<br>
+<center>
+```{r fig.height=3, fig.width=6, message=FALSE, warning=FALSE, include=FALSE}
+#DO NOT USE
+# With transparency(right)
+ggplot(data=Test_Score, aes(x=posttest, group=school_type, fill=school_type)) +
+    geom_density(adjust=1.5, alpha=.4) +
+  scale_fill_viridis(discrete=TRUE) +
+  scale_color_viridis(discrete=TRUE) +
+  theme_ipsum()+
+  theme_bw()+
+    facet_wrap(~school_type) +
+    theme(
+      legend.position="none",
+      panel.spacing = unit(1, "lines"),
+      
+    )
+
+```
+```{r VennDiagram, fig.height=6, fig.width=7, message=FALSE, warning=FALSE}
+
+# we'll call Test_Score d for easier manipulation
+
+d <- Test_Score
+
+
+
+#creating each area one for each - "Non-public" , "Experimental" , "Suburban"
+#here we'll see how many students are each one of the above. 
+#This will generate a table of true and false and its count.
+
+area1 <- count(d, school_type == "Non-public")
+
+area2<-count(d,teaching_method == "Experimental")
+
+area3 <- count(d, school_setting == "Suburban")
+
+
+
+
+#these are the area's intersection
+#we want to know how many students answer to several definitions at once
+
+n12 <- count(d, school_type == "Non-public" & teaching_method == "Experimental" )
+
+n23 <- count(d, school_setting == "Suburban" & teaching_method == "Experimental" )
+
+n13<- count(d, school_type == "Non-public" & teaching_method == "Experimental" )
+
+n123<- count(d, school_type == "Non-public" & school_setting == "Suburban" &
+               teaching_method == "Experimental" )
+
+
+#Make the venn diagram plot
+#we combine all areas to one diagram
+
+grid.newpage()
+
+draw.triple.venn(area1 = select(area1, n)[2,1], area2 = select(area2, n)[2,1], area3 = select(area3, n)[2,1], n12 = select(n12, n)[2,1], n23 = select(n23, n)[2,1], n13 = select(n123, n)[2,1], n123 =select(n123, n)[2,1], category = c("Non-public students", "Experimental students", "Suburban students"), lty = "blank", 
+    fill = c("skyblue", "pink1", "mediumorchid"))
+
+
+```
+
+</center>
+
+
+
+Here is a _venn diagram_.
+<br>
+It shows the overlapping between school_setting- Suburban, school_type - Non-public, and teaching_method - Experimental students. We can see that one student shares a lot of different characteristics at once and ruffly almost half of each category answer also to another category. We can also see that not all the students shares different characteristics and they are related to the other options that are not described in the diagram.
+From here and now we will keep in mind that those 3 categories tend to be related, especially in those 3 options.
+ 
+<br>
+<span style="color: lightseagreen;">*Now lets think, what are the characteristics of a successful student?*</span>
+
+<br>
+As we can see in our visualizations, school_setting, n_student, school_type, and teaching_method all show a clear image.
+<br>
+We can say that a successful student tends to learn in a suburban school, study in a class with no more than 20 students and with the 
+experimental teaching method.
+<br>
+But lets not rush to jump to conclusions. We'll make some models to deepen the subject!
+
+
+
+<center>
+![](https://media.giphy.com/media/xThtajG0JaEWYlIg3m/giphy.gif)
+</center>
+<br><br><br><br><br>
+
+
+### <span style= "color: seagreen;">First Model - T-TEST </span> {.tabset} 
+
+
+We want to discover any connection between the pre-test and the post - test results and see if we can tell the difference.
+<br><br>
+**First, let's check if these grades do have a normal distribution:**
+<br><br>
+```{r checking normal distribution - pretest, message=FALSE, warning=FALSE}
+ggdensity(Test_Score$pretest, color="purple", 
+          main = "Density plot of pretest scores",
+          xlab = "pretest")+
+          theme_bw()+
+          theme_classic()+
+          theme(
+            legend.position="none",
+            panel.spacing = unit(0.9, "lines"),
+            )
+
+
+
+ggqqplot(Test_Score$pretest, color="lightpink") 
+```
+<br><br>
+We can see that the pre - test scores *do not have a normal distribution*. In the first visualization, we can see that the graph has two "humps" as apposed to a normal distribution which has only one "hump".
+Additionally, all of the points on the second graph do not fall exactly on the line and we can see a curved pattern at the ends.
+<br><br>
+**We do the same process with the post test scores:**
+
+```{r Posttest Normal distribution check, message=FALSE, warning=FALSE}
+ggdensity(Test_Score$posttest,color="purple", 
+          main = "Density plot of posttest scores",
+          xlab = "posttest")
+
+ggqqplot(Test_Score$posttest, color="lightpink") 
+
+```
+
+As we've seen in the pretest visualizations, We can see that also the post - test scores *do not have a normal distribution*. In the first visualization, we can see that the graph has two large "humps".
+Additionally, all the points on the second graph do not fall exactly on the line and we can see a curved pattern at the ends.
+<br><br>
+Knowing that our data is not normally distributed, we can say that our model will not be a 100% accurate.
+It may indicate that we have another factor who influences both types of test scores.
+We will continue with our model with that held in mind.
+<br><br><br>
+**let's try to examine the connection between the results of the pre tests and post tests using T-Test function:**
+<br>
+We assume that the mean of the pretest results is lower than the post test results.
+<br>
+Our hypothesis is:
+<br>
+$$H0: mu0 - mu1 = 0$$
+$$H1: mu0 - mu1 < 0$$
+<br>
+$mu0$ - pre test
+<br>
+$mu1$ - post test
+
+let's see a visualization of both the pre test and the post test scores:
+<center>
+```{r visualization t.test, fig.height=6, fig.width=7, message=FALSE, warning=FALSE}
+
+# visualization t.test
+
+  ggplot(Test_Score) +                    # basic graphical object
+    geom_density( aes(x=pretest, colour="pretest") ) +  # first layer
+    geom_density( aes(x=posttest, colour="postest")) +  # second layer
+    #scale_y_continuous(breaks = seq(0, 90, 10), lim = c(0, 90)) +
+    labs(colour="Test Type and Its Mean", 
+       x="Test Scores",
+       y="Density") +
+    ggtitle("Pre test VS Post test scores")+
+   theme(axis.text.x = element_text(size = 20, angle = 40, hjust = 1))+
+    theme_ipsum()+
+    theme_bw()+
+    theme(
+      panel.spacing = unit(1, "lines"),
+    )+
+   geom_vline(xintercept =mean(Test_Score$pretest), color = "lightblue")+
+  geom_vline(xintercept =mean(Test_Score$posttest), color = "pink")
+ 
+
+```
+</center>
+<br><br>
+In our visualization, the red line represents the scores of the post-test and the blue line represents the scores of the pre-test.
+As we can see, the average of the post test scores is higher than the average scores of the pre-test.
+<br>
+But let's do a little test called t.test to see what does this really mean?
+<br>
+
+```{r the connection between the pretest and posttest results, message=FALSE, warning=FALSE}
+
+#the connection between the pretest and posttest results
+set.seed(0)
+Test_Score <- read_csv(file ='test_scores.csv') %>%
+  sample_n(1000)
+t.test(x = Test_Score$pretest, y = Test_Score$posttest, paired = TRUE, alternative = "two.sided")
+
+```
+<br>
+We received that the difference between the expected value in both tests is 12.028.
+It means that the mean of the results of the posttest is higher than the mean of the pretest.
+Our p-value is very small,which means we accept H1 -  the hypothesis that the expected value of the posttest is bigger than the expected value of the pretest.
+
+Finally, we can say that the confidence interval that we received is between -12.291 and -11.764 with 95% of statistical significance.
+<br>
+*Now lets proceed to our second model!* 
+<br><br>
+<center>
+![](https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80)
+</center>
+<br><br><br>
+
+### <span style= "color: seagreen;">Second Model - Linear Regression</span> {.tabset} 
+<br><br>
+<center>
+![](https://images.unsplash.com/photo-1604282806326-77ecbeb7bcdd?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1951&q=80)
+</center>
+
+
+
+
+
+
+
+
+
+
+<br><br>
+__In light of our visualization, *Does size really matter?*__
+
+Lets examine if there is a connection between the number of students in a classroom to their classroom test scores?
+
+We assume that a smaller classroom size will generate a higher mean in the post test scores.
+
+
+Our Null hypothesis is that the number of students in a class is not meaningful for our model.
+
+
+
+First, lets create a feature to analyze a class's mean and variance.
+
+we will create a new table with the mean of each classroom and it's variance as shown below:
+
+```{r creating post test means table, message=FALSE, warning=FALSE, paged.print=TRUE}
+
+#creating post test means table
+
+library(dplyr)
+set.seed(0)
+new_t <-Test_Score%>%
+  sample_n(500)%>%
+  group_by(n_student)%>% 
+  summarise(Mean=mean(posttest), Std=sd(posttest))%>%
+  glimpse()
+
+```
+
+You can notice that ruffly the variance increases as the class' size increases as well.
+The larger a class' size, the bigger it's student sampling. In order to deal with that, we have sample 500 students. Each class contains approximately 30 students multiplied by the number of class' size, 18, we have approximately 500 students. This doesn't fix it completely but we are aware of the issue and we will treat it accordingly.
+
+In light of the above, let's see if our data is normally distributed.
+here are two plots of the data distribution.
+
+```{r normall distribution plot}
+
+ggdensity(new_t$Mean, color="lightblue",
+          main = "Density plot of Means",
+          xlab = "Mean")+
+          theme_bw()+
+          theme_classic()+
+          theme(
+            legend.position="none",
+            panel.spacing = unit(0.9, "lines"),
+            )
+  
+
+ggqqplot(new_t$Mean, color= "lightblue" )+
+  ggtitle("Density plot of Means")
+
+
+```
+
+We saw earlier that the post test scores does not distribute normally.
+We can see that our data also does not distribute normally from the two plots above.
+<br>
+In the first plot we can see that the graph has two "humps", and in the second plot we can see that not all of the points land exactly on to the line. 
+<br>
+This might be caused by the small number of samples, or another factor that influences the post test, hence the inaccuracy in the distribution. <br>
+we will continue anyway with our modeling knowing it wouldn't be a 100% accurate. 
+
+
+
+
+**We are ready to plot the relationship!** 
+
+```{r visualization of the relationship between the n_student and Mean, message=FALSE, warning=FALSE}
+#this is a visualisation
+ggplot(new_t,aes(x = n_student, y = Mean, colour = 'red')     ) +
+  geom_point() +
+  theme_bw() +
+  stat_smooth(method = "lm") +
+  xlab("n_student") +
+  ggtitle("Class Mean VS Class Size") +
+  theme(
+            legend.position="none",
+            panel.spacing = unit(0.9, "lines"),
+            )
+
+```
+
+Let's look at the Class Mean VS Class Size plot. 
+In our case, we want to test if we can calculate the mean of a class given its number of students using our linear regression model:
+$$ Mean = a + nstudent ∗b $$
+These “a” and “b” values plot a line between all the points of the data. A class's mean is the response variable and n_student is the explanatory variable.
+
+This plot looks pretty linear, but let's do some t.tests!
+
+```{r t.test linear regression, message=FALSE, warning=FALSE}
+
+#this is linear regression lm 
+t.test_lm <- lm(formula = Mean~n_student, data = new_t)
+summary(t.test_lm)
+
+```
+In the t.test, we can see detailed information on the model’s performance and coefficients.
+<br>
+*Lets analyze it together!*
+<br>
+
+What does the coefficients table mean?
+<br>
+-	In the Estimate column we can see the values of the intercept (“a” value) and the slope (“b” value) for the class's mean.
+
+For every one percent increase in the number of students in a class there is an associated 1.5715 percent decrease in a class's mean.
+So our linear equation is:
+$$Mean= 102.0239 + n_student ∗(-1.5715)$$
+-	What is a p-value?
+
+In simple terms, a p-value indicates whether or not you can reject or accept a hypothesis. 
+In our case, if the p-value is smaller than 0.05, then the n_student is not meaningful.
+The p-value for n_student is 1.48e-06 which is approximately 0. A very small value means that the number of students is probably an excellent addition to our model! 
+<br><br><br>
+Seems like wer'e on the right way! 
+
+So, why do we need to look at other things like residuals?
+
+P-values by themselves can potentially be misleading without analysis of the residuals to ensure the model does not have any problems.
+
+According to the residuals section, from a first look they are not approximately zero. 
+Let's take a quick look at the actual, predicted, and residual values:
+
+
+
+```{r t.test - residuals table, message=FALSE, warning=FALSE}
+#First, we will fit our model. In this instance, let’s copy the new_t dataset to a new object d so we can manipulate it later:
+d <- new_t
+fit <- lm(Mean~n_student, data = d)
+
+#obtain predicted and residual values
+#Next, we want to get predicted and residual values to add supplementary information to this graph. We can do this as follows:
+  
+d$predicted <- predict(fit)   # Save the predicted values
+d$residuals <- residuals(fit) # Save the residual values
+# Quick look at the actual, predicted, and residual values
+library(dplyr)
+d %>%
+  select(Mean, predicted, residuals) %>%
+  head()%>%
+  glimpse()
+
+```
+<br>
+
+Looking not so good… as we can see, the residuals are not as close to zero as we hoped so. 
+
+We can see it also in the graph below:
+
+```{r t.test reseduals ploting, fig.height=4, fig.width=5, message=FALSE, warning=FALSE}
+
+#t.test reseduals' ploting
+
+# Color mapped to residual with sign taken into account.
+ggplot(d, aes(x = n_student, y = Mean)) +
+  geom_smooth(method = "lm", se = FALSE, color = "lightgrey") +
+  geom_segment(aes(xend = n_student, yend = predicted), alpha = .2) +
+  
+  #  Color adjustments made here...
+  geom_point(aes(color = residuals)) +  # Color mapped here
+  scale_color_gradient2(low = "blue", mid = "white", high = "red") +  # Colors to use here
+  guides(color = FALSE) +
+  theme_bw()+
+  geom_point(aes(y = predicted), shape = 1) +
+  ggtitle("Reseduals Ploting")
+  
+
+```
+
+
+
+
+
+The colored points are the values from the observation and the line describes all the predicted values.
+Now, let's look at the Residual vs predicted Scatter.
+
+```{r ploting residuals vs expected, echo=FALSE, fig.height=4, fig.width=5, message=FALSE, warning=FALSE, paged.print=TRUE}
+
+plot( t.test_lm$residuals,
+col="blue",main="Residual vs predicted Scatter",
+ylab= "Residual_vs_predicted", xlab="n_student")
+abline(0,0)
+
+
+
+```
+<br><br>
+
+Do you see a pattern?
+<br>
+There are two assumptions that must be:
+<br>
+• residuals are homoscedastic.
+<br>
+• residuals are distributed normally.
+
+The residuals plot looks homoscedastic as we assumed. This plot is used also to look for underlying patterns in the residuals that may mean that the model has a problem.
+We don’t see any clear patterns on our residuals scattering, which is good news! 
+
+```{r ploting if residual is noramll, fig.height=4, fig.width=5}
+
+#we can see if the residuals are normally distributed or not
+
+ggplot(d, aes(sample=residuals), col= "red")+
+  geom_qq()+
+  geom_qq_line()+
+  ggtitle("Residuals Distribution")+
+  #scale__viridis()  +
+  theme_classic()
+  
+
+```
+<br><br>
+
+Does the residuals are distributed normally?
+
+The plot shows that our residuals are not distributed normally throughout the range of samples since the points create a curved line at the and of it. 
+
+This fits our assumptions about the homoscedastic but not the normally distribution one. This means that our model would not be that accurate.
+Not so great news, but we'll continue with our model with that kept in mind!
+
+
+Last, we will examine the Multiple R-squared section.
+In general, for models that fit the data well, R² is near 1. In the Multiple R-squared section we can see that both our R-squared are around 0.76.  That means that our model can explain 76% of the total variability.
+
+
+finally, we can say in significance level of 0.05 that there is a correlation, so we reject the null hypothesis. 
+<br><br>
+
+
+
+
+### <span style= "color: seagreen;">Conclusions</span> {.tabset} 
+
+<center>
+![](https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=889&q=80)
+</center>
+<br><br><br>
+
+In our project, **we checked two main questions-**
+
+*1.How well did the pre test score predicts the post test score?*
+
+*2.What is the relationship between the number of students in a classroom to *
+  *their classroom test scores ?* 
+
+<br><br>
+
+First, we can say that the pre test score does not predict the post test score.
+
+We can see that the scores in the pre test are much lower than the post test scores. 
+
+<span style="color: lightseagreen;">**We can provide three reasonable explanations for that:**</span>
+
+1. Students give more significance to the post test than the pre test, hence they try their best at one than the other.
+
+2. The pre test prepares the students properly so they indeed improve their test scores.
+
+3. It's possible that the pre test is much harder than the post test, hence the improved scores.
+
+
+<span style="color: lightseagreen;">**We recommend operating in three manners:**</span>
+
+1.Reassure the students' understanding of the significance of the post test as much as the pre test.
+
+2.Checking whether you could implant the pre test main ideas to the whole year curriculum to improve both of their test scores before they even take the pre test.
+
+3.Reassessing the difficulty level of both exams and setting the same bar to both tests. 
+
+From here and now, we can asses that the students can do more in their final exam!
+<br>
+
+***
+
+Second, we saw that there is a relationship between the number of students in a classroom to their classroom test scores.
+
+As we assume, the smaller a class is, the higher a class' scores mean is.
+
+<span style="color: lightseagreen;">**We can provide three reasonable explanations for that:**</span>
+
+
+1. In a smaller class, teachers tend to give more attention to each student. 
+
+2. We suspect that there is a connection between the number of students in a classroom to the characteristics of a successful student such as non public school and experimental teaching method. As we mentioned before, those three generates higher test scores.
+
+3. We've seen that a large class size has higher variance than a small one. We also have more sampling of students in the larger classes. It's possible that bigger sampling of one of the smaller classes will generate the same results.  
+
+<span style="color: lightseagreen;">**We recommend operating in 3 manners:**</span>
+
+
+1.According to our linear regression model you can set your desired class' mean by checking whether you can divide the classes to smaller groups. We recommend dividing a class to 20 students or less for a mean of 70 or higher.  
+
+2.If decreasing a class' size is not an option, you can follow the three:
+
+  1) A pilot is a great idea to experiment for short periods.Decrease one class size for better results.
+
+  2) The teacher can divide the students to smaller groups or to reinforce students in smaller groups after class.  
+
+  3) check whether you could implant the non public schools or experimental teaching method's main ideas to improve the         class' mean.
+
+<br><br><br>
+
+We need to keep in mind that the two models are not 100% accurate, but we do believe that we all got to learn a little more about students. 
+<br><br>
+Education is the first step for people to gain the knowledge, critical thinking, empowerment and skills they need to make this world a better place. It's a commitment to excellence in teaching and learning.
+
+In this field, where learning is essential, We must adapt all the time and improve by embracing different conditions and methods strategies.
+
+We hope that a better understanding of the main conditions that result higher test scores will bring more fertile learning to the students.
+
+<center>
+![](https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80)
+</center>
+
+<br><br><br><br>
+As we opened with a quote by Nelson Mandela, we do believe in the importance of education and creating a better future generation. Among acquiring knowledge, the education system implant moral values and educate the students to be better individuals. Hence, the education system success is not measured only by it's students' test scores but also for it's students' quality.
+
+No matter what, the education system works hard day and night to educate each student and make their future blossom.
+
+***
+<br><br>
+<center>
+<span style="color: lightseagreen;">**_We appreciate your participation,<br> Thank you for your time!_**</span>
+<br><br>
+<span style="color: lightseagreen;">**_Any Questions?_**</span>
+</center>
+ 
+<br><br>
+
+<center>
+![](https://media.giphy.com/media/VIioHTE7WIDJNqBZqY/giphy.gif)
+</center>
+<br><br>
+
+### <span style= "color: seagreen;">Personal Note</span> {.tabset} 
+
+<br><br>
+In this project we practiced some r code writing and deepened our knowledge and understanding in the course material while researching data.
+We enjoyed researching a subject that is close to our hearts, as we ourselves are students.
+We improved our critical thinking and raised questions and hypotheses. 
+
+We managed to answer the research questions using the statistic tools we learned in this course.
+We found this experience very challenging and interesting!
+<center>
+<span style="color: lightseagreen;">**we hope you shared the same experience!**</span>
+</center>
+<br><br>
+<center>
+![](https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80)
+</center>
+
+<br><br>
