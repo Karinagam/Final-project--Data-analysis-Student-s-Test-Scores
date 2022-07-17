@@ -20,4 +20,11 @@ It will instantly create the HTML file online.
 
 
 ### A preview of the HTML file: ###
-![image](https://user-images.githubusercontent.com/103519609/179391506-e9d91f17-e37b-4f09-9d75-9b9c720ff54a.png)
+First pages:<br>
+![image](https://user-images.githubusercontent.com/103519609/179391548-99062a5f-b6e6-4d55-878e-6d7f79e0ad33.png)
+<br><br>
+![image](https://user-images.githubusercontent.com/103519609/179391565-0ad5ec48-84af-4e23-9481-dd5c7803cc78.png)<br>
+<br>![image](https://user-images.githubusercontent.com/103519609/179391587-5946e968-643f-4e89-900f-7419db456eaf.png)<br><br>
+
+#### ***A full preview can be found in the following link:***
+https://www.canva.com/design/DAFGqYYT_Dg/cOVPGRUDTZEwYDaEv7kknQ/watch?utm_content=DAFGqYYT_Dg&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink
