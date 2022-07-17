@@ -15,5 +15,5 @@ https://www.kaggle.com/datasets/kwadwoofosu/predict-test-scores-of-students
 
 ### How to cerate the HTML file: ###
 
-Using the R file, you should press the button named- Knit.
+Using the R file, you should press the button named- Knit.<br>
 It will instantly create the HTML file online.
