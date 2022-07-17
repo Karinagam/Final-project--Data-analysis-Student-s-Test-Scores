@@ -1,5 +1,5 @@
 # Final project - Data Analysis of Students' Test Scores
-#### By: Karin Agam and Shir Peretz
+### By: Karin Agam and Shir Peretz
 
 Done as the final project for a Data Analysis course at Tel Aviv University.
 
